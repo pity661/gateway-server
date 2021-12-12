@@ -1,0 +1,25 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+#        - id: path_route
+#          uri: http://httpbin.org
+#          predicates:
+#            - Path=/get
+# curl http://localhost:8080/get
+        - id: eureka-client-route
+          uri: lb://EUREKA-CLIENT
+          predicates:
+            - Path=/api-a/**
+          filters:
+            # 截去context-path
+            - StripPrefix=1
+        - id: eureka-consumer-route
+          uri: lb://EUREKA-CONSUMER
+          predicates:
+            - Path=/api-b/**
+          filters:
+            - StripPrefix=1
+# http://127.0.0.1:6400/api-a/info
+# http://127.0.0.1:6400/api-b/x?a=1&b=2
+# http://127.0.0.1:6400/api-b/multiply/1/2

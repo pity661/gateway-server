@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: query_route
+          uri: http://httpbin.org:80/get
+          predicates:
+#            - Query=foo, ba
+# curl "http://127.0.0.1:8080/get?foo=ba"
+            - Query=foo
+# curl "http://127.0.0.1:8080/get?foo=11"

@@ -1,0 +1,73 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: add_request_header_route
+          uri: https://example.org
+          filters:
+            - AddRequestHeader=X-Request-red, blue
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: add_request_header_route
+          uri: https://example.org
+          predicates:
+            - Path=/red/{segment}
+          filters:
+            - AddRequestHeader=X-Request-Red, Blue-{segment}
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: add_request_parameter_route
+          uri: https://example.org
+          filters:
+            - AddRequestParameter=red, blue
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: add_request_parameter_route
+          uri: https://example.org
+          predicates:
+            - Host={segment}.myhost.org
+          filters:
+            - AddRequestParameter=foo, bar-{segment}
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: add_response_header_route
+          uri: https://example.org
+          filters:
+            - AddResponseHeader=X-Response-Red, Blue
+---
+spring:
+  profiles: add_response_header_route
+  cloud:
+    gateway:
+      routes:
+        - id: add_response_header_route
+          uri: https://example.org
+          predicates:
+            - Host={segment}.myhost.org
+          filters:
+            - AddResponseHeader=foo, bar-{segment}
+# spring.profiles.active: filter, add_response_header_route
+# curl -vv -H 'Host:wenky.myhost.org' localhost:8080
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: dedupe_response_header_route
+          uri: https://example.org
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+# remove response headers Access-Control-Allow-Credentials Access-Control-Allow-Origin
+---

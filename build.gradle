@@ -1,0 +1,52 @@
+plugins {
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'java'
+}
+
+group = 'com.spring.cloud'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "Hoxton.SR8")
+}
+/**
+ * 代码格式化
+ */
+task runFormat(type: JavaExec) {
+    def mainJavaFiles = sourceSets.main.allJava.files
+    classpath = sourceSets.main.runtimeClasspath
+    main 'com.google.googlejavaformat.java.Main'
+    args '--replace'
+    args mainJavaFiles
+    args sourceSets.test.allJava.files
+}
+dependencies {
+    implementation 'com.google.googlejavaformat:google-java-format:1.7'
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+    // TODO 熔断配置
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
+    implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-reactor-resilience4j'
+    // redis限流 该包具有限流功能和普通的data-redis不同
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+    // 服务注册和发现
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+test {
+    useJUnitPlatform()
+}

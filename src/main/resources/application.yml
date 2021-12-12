@@ -1,0 +1,60 @@
+server:
+  port: 6400
+#  servlet:
+#    context-path:
+spring:
+  application:
+    name: gateway-server
+  profiles:
+    # 启动时指定 java -jar xx.jar --spring.profiles.active:xx 的优先级最高
+    active: after-route1, filter-hystrix, hystrix_route
+    # 会覆盖active中的相同属性值，配置在后面的文件覆盖前面的属性
+#    include: after-route1,header-route,cookie-route,host-route,method-route,path-route,query-route,weight-route
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          # 开启服务注册和发现功能，自动根据服务发现为每一个服务创建一个route，以服务名开头的请求路径转发到对应服务
+          enabled: true
+          # 使用eureka会自动把服务名大写，这里把请求路径上的服务名小写
+          lower-case-service-id: true
+# http://127.0.0.1:6400/eureka-client/info
+# http://127.0.0.1:6400/eureka-consumer/x?a=1&b=2
+# http://127.0.0.1:6400/eureka-consumer/multiply/1/2
+
+# 默认熔断器配置
+      default-filters:
+        - name: Hystrix
+          args:
+            name: defaultfallbackcmd
+            fallbackUri: forward:/defaultFallback
+# curl http://localhost:6400/delay/3 配合after-route1使用
+# 请求超时时间配置，默认1秒 HystrixCommandProperties
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          semaphore:
+            # 最大请求数 默认10
+            maxConcurrentRequests: 10
+          thread:
+            timeoutInMilliseconds: 30000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6008/eureka/
+# 相当于一个新的配置文件,效果同等于添加了application-after-route.yml文件
+---
+spring:
+  # 指定当前配置环境
+  profiles: after-route1
+  cloud:
+    gateway:
+      routes:
+        - id: after_route
+          order: 5
+          uri: http://httpbin.org  # lb://service-id
+          predicates:
+            - After=2017-01-20T17:42:47.789-07:00[America/Denver]

@@ -1,0 +1,9 @@
+# 熔断配置
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: circuitbreaker_route
+          uri: https://example.org
+          filters:
+            - CircuitBreaker=myCircuitBreaker

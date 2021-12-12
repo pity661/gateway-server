@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: weight_high
+          uri: https://www.baidu.com
+          predicates:
+            - Weight=group1, 8
+        - id: weight_low
+          uri: https://www.taobao.com
+          predicates:
+            - Weight=group1, 2
+# 直接浏览器访问 http://127.0.0.1:8080
+# 配置服务访问权重 权重越高越优先访问

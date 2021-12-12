@@ -1,0 +1,15 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: cookie_route
+          uri: http://httpbin.org
+          predicates:
+            # CookieRoutePredicateFactory
+#            - Cookie=name,forezp
+            # same effect
+            - name: Cookie
+              args:
+                name: name
+                regexp: forezp
+# curl -H Cookie:name=forezp localhost:8080

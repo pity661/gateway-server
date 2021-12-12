@@ -1,0 +1,25 @@
+# redis限流
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: limit_route
+          uri: http://httpbin.org
+          predicates:
+            - After=2017-01-20T17:42:47.789-07:00[America/Denver]
+          filters:
+            - name: RequestRateLimiter
+              args:
+                # 用于限流键bean名字，Spel表达式注入bean #{@beanName}
+#                key-resolver: '#{@redisHostKeyResolver}'
+                # 令牌桶每秒填充平均速率
+                redis-rate-limiter.replenishRate: 1
+                # 令牌桶总容量
+                redis-rate-limiter.burstCapacity: 3
+                # 每个请求消耗的默认令牌数
+                redis-rate-limiter.requestedTokens: 1
+                # 达到上限会返回429错误 Too Many Requests
+  redis:
+    host: localhost
+    port: 6379
+    database: 0

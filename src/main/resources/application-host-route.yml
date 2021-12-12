@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: host_route
+          uri: http://httpbin.org
+          predicates:
+            # HostRoutePredicateFactory
+            - Host=**.wenky.com, **.wenky1.com
+# curl -H 'Host:www.wenky.com' localhost:8080

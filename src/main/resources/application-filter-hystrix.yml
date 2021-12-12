@@ -1,0 +1,59 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: hystrix_route
+          uri: https://example.org
+          filters:
+            - Hystrix=myCommandName
+---
+spring:
+  profiles: hystrix_route
+  cloud:
+    gateway:
+      routes:
+        - id: hystrix_route
+          order: 4
+          uri: http://httpbin.org:80
+          predicates:
+            - Path=/delay/10
+          filters:
+            - name: Hystrix
+              args:
+                name: fallbackcmd
+                fallbackUri: forward:/incaseoffailureusethis
+            # 当请求/delay/10接口会被转发到/delay/10  uri所在服务必须存在请求接口
+            - RewritePath=/delay/10, /delay/6
+# 打开这个注解就会进入熔断配置返回incaseoffailureusethis接口结果
+# 会覆盖application.yml中的default配置（超时时间如果比默认的小就有效，比默认的大就会无效）
+# 超时时间是default的子集才会覆盖
+hystrix:
+  command:
+    fallbackcmd:
+      execution:
+        isolation:
+          # 在THREAD模式下，达到超时时间，直接中断 默认
+          # 在SEMAPHORE模式下，执行完成后，再判断是否超时
+          strategy: THREAD
+          thread:
+            # 请求超时进入熔断配置 默认1s
+            timeoutInMilliseconds: 5000
+# curl http://127.0.0.1:6400/delay/10
+---
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: ingredients
+          uri: lb://ingredients
+          predicates:
+            - Path=//ingredients/**
+          filters:
+            - name: Hystrix
+              args:
+                name: fetchIngredients
+                fallbackUri: forward:/fallback
+        - id: ingredients-fallback
+          uri: http://localhost:9994
+          predicates:
+            - Path=/fallback

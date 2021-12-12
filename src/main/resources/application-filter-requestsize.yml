@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: request_size_route
+          uri: http://localhost:8080/upload
+          predicates:
+            - Path=/upload
+          filters:
+            - name: RequestSize
+              args:
+                # request size limit is 5.0 MB
+                maxSize: 5000000

@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: header_route
+          uri: http://httpbin.org
+          predicates:
+            # 对应 HeaderRoutePredicateFactory
+            - Header=X-Request-Id, \d+
+# curl -H X-Request-Id:1 localhost:8080
